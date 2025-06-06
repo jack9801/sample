@@ -4,7 +4,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css'; // Bootstrap CSS
 import TRPCProvider from '../lib/trpc/TRPCProvider'; // TRPC Provider
 import '../styles/globals.css'; // Custom global styles (ensure this path is correct relative to app/layout.tsx)
-import { UserProvider } = '@auth0/nextjs-auth0/client'; // Auth0 UserProvider
+import { UserProvider } from '@auth0/nextjs-auth0/client'; // Auth0 UserProvider - CORRECTED: '=' changed to 'from'
 
 // Metadata for the application, used for SEO and browser tabs
 export const metadata = {
