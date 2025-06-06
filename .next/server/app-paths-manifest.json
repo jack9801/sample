@@ -1,0 +1,6 @@
+{
+  "/page": "app/page.js",
+  "/api/auth/[auth0]/route": "app/api/auth/[auth0]/route.js",
+  "/api/trpc/[trpc]/route": "app/api/trpc/[trpc]/route.js",
+  "/chat/page": "app/chat/page.js"
+}
