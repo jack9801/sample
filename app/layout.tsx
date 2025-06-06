@@ -1,9 +1,10 @@
-// app/layout.tsx
+// --- app/layout.tsx ---
 // This is the root layout for your Next.js application.
+// It wraps all pages and defines shared UI, metadata, and global styles/providers.
 
 import 'bootstrap/dist/css/bootstrap.min.css'; // Bootstrap CSS
-import TRPCProvider from '../lib/trpc/TRPCProvider'; // TRPC Provider (assuming this path is correct relative to app/layout.tsx)
-import '../styles/globals.css'; // Custom global styles (assuming this path is correct relative to app/layout.tsx)
+import TRPCProvider from '../lib/trpc/TRPCProvider'; // TRPC Provider
+import '../styles/globals.css'; // Custom global styles (ensure this path is correct relative to app/layout.tsx)
 import { UserProvider } from '@auth0/nextjs-auth0/client'; // Auth0 UserProvider
 
 // Metadata for the application, used for SEO and browser tabs
@@ -21,7 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Viewport meta tag for responsive design */}
+        {/* Viewport meta tag for responsive design, essential for mobile */}
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         {/* Title for the browser tab */}
         <title>ChatGPT Mobile Clone</title>
@@ -33,8 +34,8 @@ export default function RootLayout({
           crossOrigin="anonymous"
           referrerPolicy="no-referrer"
         />
-        {/* You can also add a script tag for Tailwind CSS CDN here for quick prototyping,
-            but typically Tailwind is built into Next.js using PostCSS setup. */}
+        {/* If using Tailwind CDN directly for quick testing, uncomment this.
+            In a typical Next.js setup, Tailwind is built via PostCSS. */}
         {/* <script src="https://cdn.tailwindcss.com"></script> */}
       </head>
       <body>
@@ -42,7 +43,7 @@ export default function RootLayout({
         <UserProvider>
           {/* TRPCProvider for tRPC client setup, enabling communication with tRPC API */}
           <TRPCProvider>
-            {/* The `children` prop will be the content of the current page (e.g., app/page.tsx) */}
+            {/* The `children` prop will render the content of the current page (e.g., app/page.tsx) */}
             {children}
           </TRPCProvider>
         </UserProvider>
@@ -52,14 +53,11 @@ export default function RootLayout({
 }
 
 
-// app/page.tsx
+// --- app/page.tsx ---
 // This file defines the root page (content for '/') of your Next.js application.
 // It will be rendered within the `RootLayout` defined in app/layout.tsx.
 
 import React from 'react';
-
-// You might also want to import your global CSS if it contains Tailwind directives.
-// import '../styles/globals.css'; // Already imported by layout.tsx, but good to note if this was standalone.
 
 // The HomePage component is what users will see when they visit your application's root URL.
 export default function HomePage() {
@@ -93,13 +91,22 @@ export default function HomePage() {
   );
 }
 
-// styles/globals.css (Conceptual content, as it's usually handled by PostCSS in Next.js)
-/*
-  @tailwind base;
-  @tailwind components;
-  @tailwind utilities;
 
-  body {
-    font-family: 'Inter', sans-serif;
-  }
-*/
+// --- styles/globals.css ---
+// This file typically contains global CSS, including Tailwind CSS directives.
+// Ensure this file is located at `styles/globals.css` relative to your project root,
+// or adjust the import path in `app/layout.tsx` accordingly.
+
+/* You would typically have your Tailwind CSS directives here in a real project: */
+/* @tailwind base; */
+/* @tailwind components; */
+/* @tailwind utilities; */
+
+/* Adding a basic font-family. Your package.json indicates @next/font is used for better font handling. */
+html, body {
+  font-family: 'Inter', sans-serif; /* Using a common sans-serif as a fallback */
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
