@@ -29,13 +29,9 @@ export default function RootLayout({
         <link
           rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-          xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMLcV7oQPJkl9QevSCWoR3W6A=="
           crossOrigin="anonymous"
           referrerPolicy="no-referrer"
         />
-        {/* If using Tailwind CDN directly for quick testing, uncomment this.
-            In a typical Next.js setup, Tailwind is built via PostCSS. */}
-        {/* <script src="https://cdn.tailwindcss.com"></script> */}
       </head>
       <body>
         {/* UserProvider from Auth0 for authentication context across the app */}
