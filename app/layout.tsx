@@ -1,6 +1,5 @@
 // --- app/layout.tsx ---
-// This is the root layout for your Next.js application.
-// It wraps all pages and defines shared UI, metadata, and global styles/providers.
+// SAVE THIS CODE IN: your-project-root/app/layout.tsx
 
 import 'bootstrap/dist/css/bootstrap.min.css'; // Bootstrap CSS
 import TRPCProvider from '../lib/trpc/TRPCProvider'; // TRPC Provider
@@ -54,6 +53,7 @@ export default function RootLayout({
 
 
 // --- app/page.tsx ---
+// SAVE THIS CODE IN: your-project-root/app/page.tsx
 // This file defines the root page (content for '/') of your Next.js application.
 // It will be rendered within the `RootLayout` defined in app/layout.tsx.
 
@@ -93,6 +93,7 @@ export default function HomePage() {
 
 
 // --- styles/globals.css ---
+// SAVE THIS CODE IN: your-project-root/styles/globals.css
 // This file typically contains global CSS, including Tailwind CSS directives.
 // Ensure this file is located at `styles/globals.css` relative to your project root,
 // or adjust the import path in `app/layout.tsx` accordingly.
@@ -109,4 +110,3 @@ html, body {
   padding: 0;
   box-sizing: border-box;
 }
-
