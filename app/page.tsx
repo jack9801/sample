@@ -1,21 +1,10 @@
-// app/page.tsx
-// This is a Server Component to handle authentication and redirection.
-import { getSession } from '@auth0/nextjs-auth0';
-import { redirect } from 'next/navigation';
-import LoginCard from '@/components/LoginCard'; // Import the new client component
+// This file defines the root page (content for '/') of your Next.js application.
+// It will be rendered within the `RootLayout` defined in app/layout.tsx.
+
 import React from 'react';
 
-export default async function HomePage() {
-  // getSession() is a server-side function, correctly called in a Server Component.
-  const session = await getSession();
-
-  // If authenticated, redirect to the chat page (server-side redirect).
-  if (session?.user) {
-    redirect('/chat');
-  }
-
-  // If not authenticated, render a client component for the login UI.
-  // The interactive parts of the login (like the button) will be handled client-side.
+// The HomePage component is what users will see when they visit your application's root URL.
+export default function HomePage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
       <div className="bg-white p-10 rounded-xl shadow-2xl text-center max-w-lg w-full border-b-4 border-purple-600">
@@ -27,7 +16,7 @@ export default async function HomePage() {
         </p>
         <div className="flex justify-center space-x-4">
           <a
-            href="/api/auth/login"
+            href="/api/auth/login" // Example login route if using Auth0
             className="inline-flex items-center bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-full transition duration-300 ease-in-out transform hover:scale-105 shadow-lg"
           >
             <i className="fas fa-sign-in-alt mr-2"></i> Log In
