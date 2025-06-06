@@ -1,5 +1,4 @@
-// This file defines the root page (content for '/') of your Next.js application.
-// It will be rendered within the `RootLayout` defined in app/layout.tsx.
+"use client"; // This directive marks this component as a Client Component
 
 import React from 'react';
 import { useUser } from '@auth0/nextjs-auth0/client'; // Import useUser hook from Auth0

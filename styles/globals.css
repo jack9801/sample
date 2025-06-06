@@ -1,12 +1,14 @@
-    /* You would typically have your Tailwind CSS directives here in a real project: */
-    /* @tailwind base; */
-    /* @tailwind components; */
-    /* @tailwind utilities; */
+/* This file typically contains global CSS, including Tailwind CSS directives. */
+/* Ensure this file is located at `styles/globals.css` relative to your project root. */
 
-    html, body {
-      font-family: 'Inter', sans-serif; /* Using a common sans-serif as a fallback */
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
+/* THESE ARE CRUCIAL FOR TAILWIND CSS TO WORK */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body {
+  font-family: 'Inter', sans-serif; /* Using a common sans-serif as a fallback */
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
