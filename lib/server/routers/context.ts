@@ -4,10 +4,10 @@
 
 import { initTRPC } from '@trpc/server';
 import { getSession } from '@auth0/nextjs-auth0';
-import { supabaseAdmin } from '../../supabaseClient';
+import { supabaseAdmin } from '../../../lib/supabaseClient';
 
-export async function createContext({ req }: { req: any }) {
-  const session = await getSession({ req }); // <-- FIXED
+export async function createContext({ req, res }: { req: any; res: any }) {
+  const session = await getSession(req, res);
   const userId = session?.user?.sub ?? null;
   return {
     supabase: supabaseAdmin,
