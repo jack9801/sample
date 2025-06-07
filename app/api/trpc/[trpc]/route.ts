@@ -4,9 +4,14 @@
 
 import { appRouter } from '../../../../lib/server/routers/_app';
 import { createContext } from '../../../../lib/server/routers/context';
-import { createNextApiHandler } from '@trpc/server/adapters/next';
+import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
 
-export default createNextApiHandler({
-  router: appRouter,
-  createContext,
-});
+const handler = (req: Request) =>
+  fetchRequestHandler({
+    endpoint: '/api/trpc',
+    req,
+    router: appRouter,
+    createContext,
+  });
+
+export { handler as GET, handler as POST };
