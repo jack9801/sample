@@ -213,7 +213,7 @@ const ChatPage: React.FC = () => {
     );
   }
 
-  const currentSession = chatSessions?.find(s => s.id === currentSessionId);
+  const currentSession = chatSessions?.find((s: ChatSession) => s.id === currentSessionId);
   const currentSessionTitle = currentSession?.title || "New Chat";
 
   return (
