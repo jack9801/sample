@@ -5,6 +5,7 @@
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
 import { appRouter } from '../../../../lib/server/routers/_app';
 import { createContext } from '../../../../lib/server/routers/context';
+import type { TRPCError } from '@trpc/server';
 
 const handler = (req: Request) =>
   fetchRequestHandler({
@@ -12,7 +13,7 @@ const handler = (req: Request) =>
     req,
     router: appRouter,
     createContext,
-    onError: ({ path, error }) => {
+    onError: ({ path, error }: { path?: string; error: TRPCError }) => {
       console.error(`❌ tRPC failed on ${path}:`, error);
     },
   });
