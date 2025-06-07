@@ -7,7 +7,7 @@ import { getSession } from '@auth0/nextjs-auth0';
 import { supabaseAdmin } from '../../supabaseClient';
 
 export async function createContext({ req }: { req: any }) {
-  const session = await getSession(req);
+  const session = await getSession({ req }); // <-- FIXED
   const userId = session?.user?.sub ?? null;
   return {
     supabase: supabaseAdmin,
