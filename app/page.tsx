@@ -23,15 +23,6 @@ export default function HomePage() {
   // Fetch all sessions for the user
   const getSessionsQuery = trpc.chat.getSessions.useQuery(undefined, {
     enabled: !!user,
-    onSuccess: (data) => {
-      setSessions(data as ChatSession[]);
-      if (data.length > 0 && !currentSessionId) {
-        setCurrentSessionId(data[0].id);
-      }
-    },
-    onError: (err) => {
-      setGeneralError(err.message || "Failed to load chat sessions.");
-    },
     refetchOnWindowFocus: false,
   });
 
@@ -59,6 +50,16 @@ export default function HomePage() {
       console.error('[HomePage] WARNING: currentSessionId is NOT a valid UUID:', currentSessionId);
     }
   }, [currentSessionId]);
+
+  // Use effect to handle data changes
+  useEffect(() => {
+    if (getSessionsQuery.data) {
+      setSessions(getSessionsQuery.data as ChatSession[]);
+      if (getSessionsQuery.data.length > 0 && !currentSessionId) {
+        setCurrentSessionId(getSessionsQuery.data[0].id);
+      }
+    }
+  }, [getSessionsQuery.data, currentSessionId]);
 
   // Helper function to validate UUID format
   const isValidUUID = (uuid: string) => {
