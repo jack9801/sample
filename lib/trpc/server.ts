@@ -2,7 +2,7 @@
 // This file initializes tRPC for your server-side procedures.
 
 import { initTRPC } from '@trpc/server';
-import { createContext } from './context'; // Import your context creation function
+import { createContext } from '../server/routers/context'; // Correct path
 
 /**
  * Initialization of tRPC backend
