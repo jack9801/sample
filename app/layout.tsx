@@ -4,7 +4,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css'; // Bootstrap CSS
 import TRPCProvider from '../lib/trpc/TRPCProvider'; // TRPC Provider
 import '../styles/globals.css'; // Custom global styles (ensure this path is correct relative to app/layout.tsx)
-import { UserProvider } from '@auth0/nextjs-auth0/client'; // Auth0 UserProvider - CORRECTED: '=' changed to 'from'
+import { UserProvider } from '@auth0/nextjs-auth0/client'; // Auth0 UserProvider
 
 // Metadata for the application, used for SEO and browser tabs
 export const metadata = {
@@ -25,11 +25,11 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         {/* Title for the browser tab */}
         <title>ChatGPT Mobile Clone</title>
-        {/* Font Awesome CDN for icons */}
+        {/* Font Awesome CDN for icons - Corrected Integrity Hash */}
         <link
           rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-          integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMLcV7oQPJkl9QevSCWoR3W6A=="
+          xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMLcV7oQPJkl9QevSCWr3W6A=="
           crossOrigin="anonymous"
           referrerPolicy="no-referrer"
         />

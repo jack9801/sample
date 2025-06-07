@@ -1,17 +1,19 @@
-// app/api/trpc/[trpc]/route.ts
-// This is the tRPC API route handler for Next.js App Router.
+// app/api/trpc/[...trpc]/route.ts
+// This file sets up the Next.js App Router API route to handle all tRPC requests.
+// **IMPORTANT**: Ensure this file is named `[...trpc]/route.ts` (with triple dots).
 
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
-import { appRouter, createContext } from '@/lib/trpc/server'; // Import our tRPC router and context creator
+import { appRouter } from '../../../../lib/server/routers/_app';
+import { createContext } from '../../../../lib/server/routers/context';
 
 const handler = (req: Request) =>
   fetchRequestHandler({
-    endpoint: '/api/trpc', // The endpoint for our tRPC API
+    endpoint: '/api/trpc',
     req,
     router: appRouter,
-    createContext: () => createContext(), // ✅ No arguments
+    createContext,
     onError: ({ path, error }) => {
-      console.error(`❌ tRPC failed on ${path ?? '<no-path>'}: ${error.message}`);
+      console.error(`❌ tRPC failed on ${path}:`, error);
     },
   });
 

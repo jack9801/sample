@@ -13,12 +13,12 @@ interface ChatMessage {
   role: 'user' | 'model';
   type: 'text' | 'image' | 'image_prompt';
   created_at: string;
-  user_id: string; // Keep for consistency, though session_id is now primary link
-  session_id: string; // New: Link to chat session
+  user_id: string;
+  session_id: string; // Link to chat session
 }
 
 interface ChatBoxProps {
-  currentSessionId: string; // New: Accepts the active session ID
+  currentSessionId: string; // Accepts the active session ID
 }
 
 const ChatBox: React.FC<ChatBoxProps> = ({ currentSessionId }) => {
@@ -83,6 +83,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ currentSessionId }) => {
 
   const handleSendMessage = async (prompt: string) => {
     console.log('[ChatBox] handleSendMessage called with prompt:', prompt);
+    console.log('[ChatBox] Sending message for sessionId:', currentSessionId); // LOGGING ADDED
     setError(null);
     if (!currentSessionId) {
       setError('No active chat session. Please start a new chat.');
@@ -102,7 +103,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ currentSessionId }) => {
 
     try {
       console.log('[ChatBox] Calling sendTextMutation...');
-      await sendTextMutation.mutateAsync({ prompt, isUser: true, sessionId: currentSessionId });
+      await sendTextMutation.mutateAsync({ prompt, sessionId: currentSessionId });
       // The onSuccess callback will handle refetching and state update
     } catch (err: any) {
       console.error('[ChatBox] Error in handleSendMessage:', err);
@@ -113,6 +114,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ currentSessionId }) => {
 
   const handleGenerateImage = async (prompt: string) => {
     console.log('[ChatBox] handleGenerateImage called with prompt:', prompt);
+    console.log('[ChatBox] Generating image for sessionId:', currentSessionId); // LOGGING ADDED
     setError(null);
     if (!currentSessionId) {
       setError('No active chat session. Please start a new chat.');

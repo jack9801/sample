@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Container, Navbar, Button, Spinner, Offcanvas, ListGroup, Form, InputGroup, Alert } from 'react-bootstrap';
+import { Container, Navbar, Button, Spinner, Offcanvas, ListGroup, Form, InputGroup, Alert, Col } from 'react-bootstrap';
 import ChatBox from '@/components/ChatBox';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { useRouter } from 'next/navigation';
@@ -21,16 +21,17 @@ const ChatPage: React.FC = () => {
   const router = useRouter();
 
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
-  const [showOffcanvas, setShowOffcanvas] = useState(false); // State for Offcanvas visibility
-  const [editingSessionId, setEditingSessionId] = useState<string | null>(null); // State for which session is being edited
-  const [newSessionTitle, setNewSessionTitle] = useState<string>(''); // State for the new title input
+  const [showOffcanvas, setShowOffcanvas] = useState(false);
+  const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
+  const [newSessionTitle, setNewSessionTitle] = useState<string>('');
+  const [sessions, setSessions] = useState<ChatSession[]>([]);
+  const [restoredFromStorage, setRestoredFromStorage] = useState(false);
 
-  // tRPC hooks for sessions and messages
-  const createChatSessionMutation = trpc.chat.createChatSession.useMutation();
-  const deleteChatSessionMutation = trpc.chat.deleteChatSession.useMutation();
-  const updateChatSessionTitleMutation = trpc.chat.updateChatSessionTitle.useMutation();
-  // Fetch all chat sessions for the user
-  const { data: chatSessions, isLoading: isLoadingSessions, isError: isErrorSessions, refetch: refetchChatSessions } = trpc.chat.getChatSessions.useQuery();
+  // tRPC hooks for sessions and messages (CORRECT HOOK NAMES)
+  const createSessionMutation = trpc.chat.createSession.useMutation();
+  const deleteSessionMutation = trpc.chat.deleteSession.useMutation();
+  const renameSessionMutation = trpc.chat.renameSession.useMutation();
+  const { data: chatSessions, isLoading: isLoadingSessions, isError: isErrorSessions, refetch: refetchChatSessions } = trpc.chat.getSessions.useQuery();
 
   // Get tRPC context for query invalidation
   const trpcContext = trpc.useContext();
@@ -41,26 +42,38 @@ const ChatPage: React.FC = () => {
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!isLoading && !user) {
-      console.log("[ChatPage] User not authenticated or session expired, redirecting to login.");
       router.push('/');
     }
     if (error) {
-      console.error("[ChatPage] Auth0 error:", error);
       router.push('/');
     }
   }, [user, isLoading, error, router]);
 
   // Handle initial session loading or creation
   useEffect(() => {
-    if (user && chatSessions && !isLoadingSessions) {
+    const savedSessionId = localStorage.getItem("currentSessionId");
+    if (savedSessionId && isValidUUID(savedSessionId)) {
+      setCurrentSessionId(savedSessionId);
+    }
+    setRestoredFromStorage(true);
+  }, []);
+
+  // Auto-select or create a session on load
+  useEffect(() => {
+    if (
+      user &&
+      chatSessions &&
+      !isLoadingSessions &&
+      restoredFromStorage
+    ) {
       if (chatSessions.length > 0 && !currentSessionId) {
         setCurrentSessionId(chatSessions[0].id);
-        console.log("[ChatPage] Set initial chat session to:", chatSessions[0].id);
       } else if (chatSessions.length === 0 && !currentSessionId) {
         handleNewChat();
       }
     }
-  }, [user, chatSessions, isLoadingSessions, currentSessionId]);
+    // eslint-disable-next-line
+  }, [user, chatSessions, isLoadingSessions, currentSessionId, restoredFromStorage]);
 
   // Effect to focus the input field when editing starts
   useEffect(() => {
@@ -74,14 +87,11 @@ const ChatPage: React.FC = () => {
     setShowOffcanvas(false);
     setEditingSessionId(null);
     try {
-      console.log("[ChatPage] Creating new chat session...");
-      const newSession = await createChatSessionMutation.mutateAsync();
-      console.log("[ChatPage] New chat session created:", newSession.id);
+      const newSession = await createSessionMutation.mutateAsync({ title: `New Chat ${sessions.length + 1}` });
       setCurrentSessionId(newSession.id);
       await refetchChatSessions();
       await trpcContext.chat.getMessages.invalidate();
     } catch (err: any) {
-      console.error("[ChatPage] Failed to create new chat session:", err);
       window.alert(`Failed to create new chat: ${err.message}`);
     }
   };
@@ -92,7 +102,6 @@ const ChatPage: React.FC = () => {
     setEditingSessionId(null);
     if (sessionId !== currentSessionId) {
       setCurrentSessionId(sessionId);
-      console.log("[ChatPage] Switched to chat session:", sessionId);
       await trpcContext.chat.getMessages.invalidate();
     }
   };
@@ -101,9 +110,7 @@ const ChatPage: React.FC = () => {
   const handleDeleteSession = async (sessionId: string) => {
     if (window.confirm("Are you sure you want to delete this chat session? This cannot be undone.")) {
       try {
-        console.log(`[ChatPage] Deleting session: ${sessionId}`);
-        await deleteChatSessionMutation.mutateAsync({ sessionId });
-        console.log(`[ChatPage] Session ${sessionId} deleted.`);
+        await deleteSessionMutation.mutateAsync({ sessionId });
         await refetchChatSessions();
 
         if (currentSessionId === sessionId) {
@@ -117,7 +124,6 @@ const ChatPage: React.FC = () => {
           }
         }
       } catch (err: any) {
-        console.error(`[ChatPage] Failed to delete session ${sessionId}:`, err);
         window.alert(`Failed to delete chat: ${err.message}`);
       }
     }
@@ -142,19 +148,16 @@ const ChatPage: React.FC = () => {
       return;
     }
     try {
-      console.log(`[ChatPage] Renaming session ${sessionId} to "${newSessionTitle}"`);
-      await updateChatSessionTitleMutation.mutateAsync({ sessionId, newTitle: newSessionTitle.trim() });
-      console.log(`[ChatPage] Session ${sessionId} renamed successfully.`);
+      await renameSessionMutation.mutateAsync({ sessionId, newTitle: newSessionTitle.trim() });
       await refetchChatSessions();
       setEditingSessionId(null);
       setNewSessionTitle('');
     } catch (err: any) {
-      console.error(`[ChatPage] Failed to rename session ${sessionId}:`, err);
       window.alert(`Failed to rename chat: ${err.message}`);
     }
   };
 
-  // NEW: Handler for pressing Enter key during rename (updated event type)
+  // Handler for pressing Enter/Escape during rename
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>, sessionId: string) => {
     if (e.key === 'Enter') {
       handleSaveTitle(sessionId);
@@ -164,9 +167,31 @@ const ChatPage: React.FC = () => {
     }
   };
 
+  // Sync local sessions state with query data
+  useEffect(() => {
+    console.log("chatSessions changed:", chatSessions);
+    if (chatSessions) {
+      setSessions(chatSessions);
+    }
+  }, [chatSessions]);
+
+  // Restore currentSessionId from localStorage on mount
+  useEffect(() => {
+    const savedSessionId = localStorage.getItem("currentSessionId");
+    if (savedSessionId && isValidUUID(savedSessionId)) {
+      setCurrentSessionId(savedSessionId);
+    }
+    setRestoredFromStorage(true);
+  }, []);
+
+  // Save currentSessionId to localStorage whenever it changes
+  useEffect(() => {
+    if (currentSessionId && isValidUUID(currentSessionId)) {
+      localStorage.setItem("currentSessionId", currentSessionId);
+    }
+  }, [currentSessionId]);
 
   if (isLoading) {
-    console.log("[ChatPage] Auth0 is loading user session...");
     return (
       <Container fluid className="d-flex justify-content-center align-items-center vh-100">
         <Spinner animation="border" role="status">
@@ -177,7 +202,6 @@ const ChatPage: React.FC = () => {
   }
 
   if (!user) {
-    console.log("[ChatPage] No user found after loading, showing access denied message.");
     return (
       <Container fluid className="text-center p-5 d-flex flex-column justify-content-center align-items-center vh-100">
         <h1>Access Denied</h1>
@@ -189,10 +213,8 @@ const ChatPage: React.FC = () => {
     );
   }
 
-  console.log("[ChatPage] User authenticated:", user.name || user.email || user.sub);
   const currentSession = chatSessions?.find(s => s.id === currentSessionId);
   const currentSessionTitle = currentSession?.title || "New Chat";
-
 
   return (
     <>
@@ -239,7 +261,7 @@ const ChatPage: React.FC = () => {
             <Alert variant="danger">Failed to load chats.</Alert>
           ) : (
             <ListGroup variant="flush">
-              {chatSessions?.map((session) => (
+              {sessions.map((session) => (
                 <ListGroup.Item
                   key={session.id}
                   action
@@ -254,7 +276,7 @@ const ChatPage: React.FC = () => {
                         type="text"
                         value={newSessionTitle}
                         onChange={handleChangeTitle}
-                        onKeyDown={(e) => handleKeyDown(e, session.id)} // Fixed type here
+                        onKeyDown={(e) => handleKeyDown(e, session.id)}
                         onClick={(e) => e.stopPropagation()}
                         onBlur={() => handleSaveTitle(session.id)}
                         className="rounded-start"
@@ -303,18 +325,100 @@ const ChatPage: React.FC = () => {
         </Offcanvas.Body>
       </Offcanvas>
 
-      {currentSessionId ? (
-        <ChatBox currentSessionId={currentSessionId} />
-      ) : (
-        <Container fluid className="d-flex justify-content-center align-items-center flex-column vh-100">
-          <Spinner animation="border" role="status" className="mb-3">
-            <span className="visually-hidden">Loading chat...</span>
-          </Spinner>
-          <p>Waiting for a chat session to be created or loaded...</p>
-        </Container>
-      )}
+      <Container fluid className="d-flex flex-column flex-md-row vh-100 p-0">
+        {/* Sidebar for chat sessions - hidden on small screens */}
+        <Col xs={12} md={3} className="p-0 border-end d-flex flex-column bg-light d-none d-md-flex">
+          <div className="p-3 border-bottom d-flex justify-content-between align-items-center">
+            <h6 className="mb-0">Chats</h6>
+            <Button
+              variant="outline-primary"
+              size="sm"
+              onClick={() => {
+                if (!createSessionMutation.isPending) {
+                  createSessionMutation.mutate({ title: `New Chat ${sessions.length + 1}` });
+                }
+              }}
+              disabled={createSessionMutation.isPending}
+              className="rounded-pill"
+            >
+              {createSessionMutation.isPending ? <Spinner animation="border" size="sm" /> : <i className="fas fa-plus me-1"></i>}
+              New Chat
+            </Button>
+          </div>
+          <div className="list-group list-group-flush flex-grow-1 overflow-y-auto">
+            {sessions.map((session) => (
+              <div key={session.id} className="d-flex align-items-center">
+                <Button
+                  as="a"
+                  href="#"
+                  className={`flex-grow-1 text-start list-group-item list-group-item-action ${session.id === currentSessionId ? 'active' : ''}`}
+                  onClick={(e) => { e.preventDefault(); setCurrentSessionId(session.id); }}
+                >
+                  {session.title || `Chat ${new Date(session.created_at).toLocaleDateString()}`}
+                </Button>
+                {/* Rename */}
+                <Button
+                  variant="outline-secondary"
+                  size="sm"
+                  className="ms-1"
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    const newTitle = prompt("Enter new chat title:", session.title);
+                    if (newTitle && newTitle.trim() && newTitle !== session.title) {
+                      await renameSessionMutation.mutateAsync({ sessionId: session.id, newTitle: newTitle.trim() });
+                      await refetchChatSessions();
+                    }
+                  }}
+                  title="Rename Chat"
+                >
+                  <i className="fas fa-pencil-alt"></i>
+                </Button>
+                {/* Delete */}
+                <Button
+                  variant="outline-danger"
+                  size="sm"
+                  className="ms-1"
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    if (window.confirm("Are you sure you want to delete this chat?")) {
+                      await deleteSessionMutation.mutateAsync({ sessionId: session.id });
+                      await refetchChatSessions();
+                      if (currentSessionId === session.id) setCurrentSessionId(null);
+                    }
+                  }}
+                  title="Delete Chat"
+                >
+                  <i className="fas fa-trash"></i>
+                </Button>
+              </div>
+            ))}
+            {sessions.length === 0 && (
+              <div className="p-3 text-center text-muted">No chats yet. Click "New Chat" to start.</div>
+            )}
+          </div>
+        </Col>
+
+        <Col xs={12} md={9} className="p-0">
+          {currentSessionId ? (
+            <ChatBox currentSessionId={currentSessionId} />
+          ) : (
+            <Container fluid className="d-flex justify-content-center align-items-center flex-column vh-100">
+              <Spinner animation="border" role="status" className="mb-3">
+                <span className="visually-hidden">Loading chat...</span>
+              </Spinner>
+              <p>Waiting for a chat session to be created or loaded...</p>
+            </Container>
+          )}
+        </Col>
+      </Container>
     </>
   );
 };
 
 export default ChatPage;
+
+function isValidUUID(uuid: any) {
+  // Basic UUID validation regex
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return typeof uuid === 'string' && uuidRegex.test(uuid);
+}

@@ -1,7 +1,7 @@
+/* --- styles/globals.css --- */
 /* This file typically contains global CSS, including Tailwind CSS directives. */
 /* Ensure this file is located at `styles/globals.css` relative to your project root. */
 
-/* THESE ARE CRUCIAL FOR TAILWIND CSS TO WORK */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -11,4 +11,52 @@ html, body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  height: 100%; /* Ensure html and body take full height */
+}
+
+/* Ensure #__next (Next.js root div) also takes full height */
+#__next {
+  height: 100%;
+  display: flex; /* Make it a flex container to allow children to grow */
+  flex-direction: column; /* Stack children vertically */
+}
+
+/* Custom scrollbar for better mobile feel (optional, but good for chat) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-track {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Utility for text shadow, used in landing page */
+.text-shadow {
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Gradient background for landing page */
+.bg-gradient-to-br {
+  background-image: linear-gradient(to bottom right, var(--bs-blue), var(--bs-purple));
+}
+
+/* Mobile specific styling for sessions sidebar in page.tsx */
+@media (max-width: 767.98px) {
+  /* Hide the sessions column on small screens by default */
+  .d-md-block-only { /* A class to target this */
+    display: none !important;
+  }
+}
+
+/* Centering and shadow for larger screens */
+@media (min-width: 768px) {
+  body, html, #__next {
+    max-width: 480px;
+    margin: 0 auto;
+    box-shadow: 0 0 24px rgba(0,0,0,0.1);
+  }
 }
