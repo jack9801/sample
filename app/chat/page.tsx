@@ -115,7 +115,7 @@ const ChatPage: React.FC = () => {
 
         if (currentSessionId === sessionId) {
           if (chatSessions && chatSessions.length > 1) {
-            const remainingSessions = chatSessions.filter(s => s.id !== sessionId);
+            const remainingSessions = chatSessions.filter((s: ChatSession) => s.id !== sessionId);
             setCurrentSessionId(remainingSessions[0].id);
             await trpcContext.chat.getMessages.invalidate();
           } else {
